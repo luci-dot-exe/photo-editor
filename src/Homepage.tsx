@@ -165,6 +165,41 @@ export function Homepage() {
             return;
           }
 
+          const mat = window.cv.imread(canvasOutputRef.current);
+
+          if (!mat.isContinuous()) {
+            console.error("Not continuous!");
+            return;
+          }
+
+          const { coordinates2Index, index2Coordinates } = createHandler(mat);
+
+          const target = mat.data.map((_, index, source) => {
+            const coordinates = index2Coordinates(index);
+
+            const srcIndex = coordinates2Index({
+              ...coordinates,
+              col: mat.cols - coordinates.col - 1,
+            });
+
+            return source[srcIndex];
+          });
+
+          mat.data.set(target, 0);
+
+          window.cv.imshow(canvasOutputRef.current, mat);
+          mat.delete();
+        }}
+      >
+        Flip horizontally
+      </button>{" "}
+      <button
+        className="btn btn-primary"
+        onClick={async () => {
+          if (canvasOutputRef.current === null) {
+            return;
+          }
+
           const imageDataURL = canvasOutputRef.current.toDataURL("image/jpeg");
 
           const downloadLink = document.createElement("a");
