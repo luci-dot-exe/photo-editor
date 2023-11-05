@@ -1,7 +1,7 @@
 {
   "name": "modern-web-app-template",
   "version": "0.1.0",
-  "homepage": "https://[your-github-username].github.io/[your-repository-name]/",
+  "homepage": "https://luci-dot-exe.github.io/photo-editor/",
   "private": true,
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.36",
