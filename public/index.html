@@ -28,7 +28,7 @@
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
+    <div id="root" data-opencv-status="LOADING"></div>
     <!--
       This HTML file is a template.
       If you open it directly in the browser, you will see an empty page.
@@ -39,5 +39,22 @@
       To begin the development, run `npm start` or `yarn start`.
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
+
+    <script type="text/javascript">
+      var Module = {
+        // https://emscripten.org/docs/api_reference/module.html#Module.onRuntimeInitialized
+        onRuntimeInitialized() {
+          document
+            .getElementById("root")
+            .setAttribute("data-opencv-status", "READY");
+        },
+      };
+    </script>
+
+    <script
+      async
+      src="https://docs.opencv.org/master/opencv.js"
+      type="text/javascript"
+    ></script>
   </body>
 </html>

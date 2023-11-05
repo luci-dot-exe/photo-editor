@@ -1,3 +1,5 @@
+import { Homepage } from "./Homepage";
+
 function App() {
   return (
     <div>
@@ -14,10 +16,6 @@ function App() {
       </div>
     </div>
   );
-}
-
-function Homepage() {
-  return <div>Hello :)</div>;
 }
 
 export default App;
