@@ -30,6 +30,10 @@ function createHandler(mat: Mat.Mat) {
   return { index2Coordinates, coordinates2Index };
 }
 
+function range(value: number) {
+  return new Array(value).fill(null).map((_, index) => index);
+}
+
 export function Homepage() {
   const [pageState, setPageState] = useState<string | null>(null);
   const originalImageRef = useRef<HTMLImageElement>(null);
@@ -200,6 +204,36 @@ export function Homepage() {
             return;
           }
 
+          const mat = window.cv.imread(canvasOutputRef.current);
+
+          if (!mat.isContinuous()) {
+            console.error("Not continuous!");
+            return;
+          }
+
+          range(mat.cols)
+            .flatMap((col) => range(mat.rows).map((row) => ({ row, col })))
+            .forEach(({ col, row }) => {
+              const ptr = mat.ucharPtr(row, col);
+
+              const [r, g, b, a] = [ptr[0], ptr[1], ptr[2], ptr[3]];
+              const result = 0.299 * r + 0.587 * g + 0.114 * b;
+              ptr.set([result, result, result, a]);
+            });
+
+          window.cv.imshow(canvasOutputRef.current, mat);
+          mat.delete();
+        }}
+      >
+        Shades of gray
+      </button>{" "}
+      <button
+        className="btn btn-primary"
+        onClick={async () => {
+          if (canvasOutputRef.current === null) {
+            return;
+          }
+
           const imageDataURL = canvasOutputRef.current.toDataURL("image/jpeg");
 
           const downloadLink = document.createElement("a");
@@ -209,7 +243,7 @@ export function Homepage() {
           downloadLink.click();
         }}
       >
-        download
+        Download
       </button>
     </div>
   );
