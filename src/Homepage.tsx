@@ -8,8 +8,11 @@ import {
   faPalette,
   faDownload,
   faImage,
+  faSave,
+  faTimes,
 } from "@fortawesome/free-solid-svg-icons";
 import defaultImage from "./img/Underwater_53k.jpg";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
 
 type Coordinates = { channel: number; col: number; row: number };
 
@@ -49,6 +52,11 @@ export function Homepage() {
   const canvasOutputRef = useRef<HTMLCanvasElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const [coloringState, setColoringState] = useState<{
+    turnToShades: boolean;
+    numberOfShades: number;
+  }>({ turnToShades: false, numberOfShades: 255 });
+
   const [openCvStatus, setOpenCvStatus] = useState<OpenCvStatus>(
     getOpenCVStatus()
   );
@@ -78,6 +86,7 @@ export function Homepage() {
   return (
     <div>
       <div style={{ margin: 2 }}></div>
+
       <img
         ref={originalImageRef}
         alt="original file (should not be visible)"
@@ -97,7 +106,7 @@ export function Homepage() {
       <input
         ref={inputRef}
         type="file"
-        accept="image/jpeg"
+        accept="image/*"
         className="form-control"
         style={{ display: "none" }}
         onChange={(ev) => {
@@ -206,38 +215,90 @@ export function Homepage() {
               >
                 <FontAwesomeIcon icon={faArrowsAltH} />
               </button>{" "}
-              <button
-                className="btn btn-primary"
-                onClick={async () => {
-                  if (canvasOutputRef.current === null) {
-                    return;
-                  }
+              <Modal
+                button={{ icon: faPalette, context: "primary" }}
+                title="Coloring"
+                actions={[
+                  { context: "secondary", icon: faTimes, onClick: () => {} },
+                  {
+                    context: "success",
+                    icon: faSave,
+                    onClick: () => {
+                      if (!coloringState.turnToShades) {
+                        return;
+                      }
+                      if (canvasOutputRef.current === null) {
+                        return;
+                      }
 
-                  const mat = window.cv.imread(canvasOutputRef.current);
+                      const mat = window.cv.imread(canvasOutputRef.current);
 
-                  if (!mat.isContinuous()) {
-                    console.error("Not continuous!");
-                    return;
-                  }
+                      if (!mat.isContinuous()) {
+                        console.error("Not continuous!");
+                        return;
+                      }
 
-                  range(mat.cols)
-                    .flatMap((col) =>
-                      range(mat.rows).map((row) => ({ row, col }))
-                    )
-                    .forEach(({ col, row }) => {
-                      const ptr = mat.ucharPtr(row, col);
+                      range(mat.cols)
+                        .flatMap((col) =>
+                          range(mat.rows).map((row) => ({ row, col }))
+                        )
+                        .forEach(({ col, row }) => {
+                          const ptr = mat.ucharPtr(row, col);
 
-                      const [r, g, b, a] = [ptr[0], ptr[1], ptr[2], ptr[3]];
-                      const result = 0.299 * r + 0.587 * g + 0.114 * b;
-                      ptr.set([result, result, result, a]);
-                    });
+                          const [r, g, b, a] = [ptr[0], ptr[1], ptr[2], ptr[3]];
+                          const result = 0.299 * r + 0.587 * g + 0.114 * b;
+                          ptr.set([result, result, result, a]);
+                        });
 
-                  window.cv.imshow(canvasOutputRef.current, mat);
-                  mat.delete();
-                }}
-              >
-                <FontAwesomeIcon icon={faPalette} />
-              </button>{" "}
+                      window.cv.imshow(canvasOutputRef.current, mat);
+                      mat.delete();
+                    },
+                  },
+                ]}
+                content={
+                  <>
+                    <div className="form-check">
+                      <input
+                        className="form-check-input"
+                        id="turnToShades"
+                        type="checkbox"
+                        checked={coloringState.turnToShades}
+                        onChange={(ev) =>
+                          setColoringState((s) => ({
+                            ...s,
+                            turnToShades: ev.target.checked,
+                          }))
+                        }
+                      />
+                      <label
+                        htmlFor="turnToShades"
+                        className="form-check-label"
+                      >
+                        Convert image to shades of gray
+                      </label>
+                    </div>
+
+                    <label htmlFor="numberOfShades" className="form-label">
+                      Number of shades: {coloringState.numberOfShades}
+                    </label>
+                    <input
+                      type="range"
+                      className="form-range"
+                      id="numberOfShades"
+                      value={coloringState.numberOfShades}
+                      disabled={!coloringState.turnToShades}
+                      min={2}
+                      max={255}
+                      onChange={(ev) =>
+                        setColoringState((s) => ({
+                          ...s,
+                          numberOfShades: parseInt(ev.target.value),
+                        }))
+                      }
+                    />
+                  </>
+                }
+              />{" "}
               <button
                 className="btn btn-success"
                 onClick={async () => {
@@ -262,5 +323,76 @@ export function Homepage() {
         </div>
       </div>
     </div>
+  );
+}
+
+type Context = "primary" | "danger" | "success" | "secondary";
+
+type IButton = {
+  text?: string;
+  icon?: IconProp;
+  context: Context;
+  onClick: () => void;
+};
+
+function Button({ context, icon, text, onClick }: IButton) {
+  return (
+    <button type="button" className={`btn btn-${context}`} onClick={onClick}>
+      {icon && <FontAwesomeIcon icon={icon} />} {text}
+    </button>
+  );
+}
+
+function Modal({
+  button,
+  title,
+  actions,
+  content,
+}: {
+  button: Omit<IButton, "onClick">;
+  title: string;
+  content: JSX.Element;
+  actions: IButton[];
+}) {
+  const [show, setShow] = useState(false);
+
+  return (
+    <>
+      {<Button {...button} onClick={() => setShow(true)} />}
+
+      <div
+        className="modal fade show"
+        style={{ display: show ? "block" : "none" }}
+        tabIndex={-1}
+        aria-hidden="true"
+      >
+        <div className="modal-dialog">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">{title}</h5>
+              <button
+                type="button"
+                className="btn-close"
+                aria-label="Close"
+                onClick={() => setShow(false)}
+              />
+            </div>
+            <div className="modal-body">{content}</div>
+            <div className="modal-footer">
+              {actions.map((action, index) => (
+                <Button
+                  key={index}
+                  {...action}
+                  onClick={() => {
+                    action.onClick();
+                    setShow(false);
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
