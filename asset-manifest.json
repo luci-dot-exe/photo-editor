@@ -1,15 +1,16 @@
 {
   "files": {
     "main.css": "/photo-editor/static/css/main.e4889cbf.css",
-    "main.js": "/photo-editor/static/js/main.c2adeeae.js",
+    "main.js": "/photo-editor/static/js/main.c32e166d.js",
     "static/js/787.58336002.chunk.js": "/photo-editor/static/js/787.58336002.chunk.js",
+    "static/media/Underwater_53k.jpg": "/photo-editor/static/media/Underwater_53k.9fbe9c205a67334a72f4.jpg",
     "index.html": "/photo-editor/index.html",
     "main.e4889cbf.css.map": "/photo-editor/static/css/main.e4889cbf.css.map",
-    "main.c2adeeae.js.map": "/photo-editor/static/js/main.c2adeeae.js.map",
+    "main.c32e166d.js.map": "/photo-editor/static/js/main.c32e166d.js.map",
     "787.58336002.chunk.js.map": "/photo-editor/static/js/787.58336002.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.e4889cbf.css",
-    "static/js/main.c2adeeae.js"
+    "static/js/main.c32e166d.js"
   ]
 }
