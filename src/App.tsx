@@ -11,7 +11,7 @@ function App() {
         </div>
       </nav>
 
-      <div className="container">
+      <div className="container" style={{ maxWidth: 768 }}>
         <Homepage />
       </div>
     </div>
