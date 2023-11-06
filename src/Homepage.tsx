@@ -55,7 +55,7 @@ export function Homepage() {
   const [coloringState, setColoringState] = useState<{
     turnToShades: boolean;
     numberOfShades: number;
-  }>({ turnToShades: false, numberOfShades: 255 });
+  }>({ turnToShades: false, numberOfShades: 256 });
 
   const [openCvStatus, setOpenCvStatus] = useState<OpenCvStatus>(
     getOpenCVStatus()
@@ -247,7 +247,15 @@ export function Homepage() {
 
                           const [r, g, b, a] = [ptr[0], ptr[1], ptr[2], ptr[3]];
                           const result = 0.299 * r + 0.587 * g + 0.114 * b;
-                          ptr.set([result, result, result, a]);
+
+                          const step = Math.floor(
+                            (255 + 1) / coloringState.numberOfShades
+                          );
+
+                          const bucket = Math.floor(result / step);
+                          const value = bucket * step;
+
+                          ptr.set([value, value, value, a]);
                         });
 
                       window.cv.imshow(canvasOutputRef.current, mat);
@@ -288,7 +296,7 @@ export function Homepage() {
                       value={coloringState.numberOfShades}
                       disabled={!coloringState.turnToShades}
                       min={2}
-                      max={255}
+                      max={256}
                       onChange={(ev) =>
                         setColoringState((s) => ({
                           ...s,
